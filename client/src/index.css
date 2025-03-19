@@ -1,2 +1,27 @@
 @import "tailwindcss";
 @plugin "daisyui";
+@import "@fontsource/orbitron";
+
+.font-orbitron {
+  font-family: "Orbitron", sans-serif;
+}
+
+.neon-glow {
+  text-shadow: 0 0 8px rgba(138, 43, 226, 0.8), 0 0 20px rgba(138, 43, 226, 0.6);
+}
+
+.neon-underline::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #8a2be2, #4b0082);
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  transition: width 0.3s ease-in-out;
+}
+
+.neon-underline:hover::after {
+  width: 100%;
+}
