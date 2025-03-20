@@ -11,6 +11,9 @@ import Home from "./pages/dashboard/home";
 import AskQuestion from "./pages/dashboard/AskQuestion";
 import ProfilePage from "./pages/dashboard/Profile";
 import ChangePassword from "./pages/dashboard/ChangePassword";
+import MyQuestions from "./pages/dashboard/MyQuestions";
+import QuestionDetail from "./pages/Questions/ViewQuestion";
+import AddAnswer from "./pages/Questions/AddAnswer";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -69,6 +72,30 @@ const AnimatedRoutes = () => {
           element={
             <motion.div {...pageVariants}>
               <ChangePassword />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/my"
+          element={
+            <motion.div {...pageVariants}>
+              <MyQuestions />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/question"
+          element={
+            <motion.div {...pageVariants}>
+              <QuestionDetail />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/answer"
+          element={
+            <motion.div {...pageVariants}>
+              <AddAnswer />
             </motion.div>
           }
         />

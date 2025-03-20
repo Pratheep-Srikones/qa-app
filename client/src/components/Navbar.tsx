@@ -1,17 +1,23 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
+  const handleLogout = () => {
+    console.log("Logging out..."); // Replace with actual logout logic
+    navigate("/login"); // Redirect to login after logout
+  };
+
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Ask Question", path: "/ask" },
-    { name: "My Questions", path: "/my-questions" },
+    { name: "My Questions", path: "/my" },
     { name: "Profile", path: "/profile" },
   ];
 
@@ -27,7 +33,7 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-6">
+        <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <Link
               key={item.path}
@@ -46,6 +52,14 @@ const Navbar = () => {
               />
             </Link>
           ))}
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center text-white text-lg font-medium transition-all duration-300 hover:text-red-500"
+          >
+            Logout <LogOut size={20} className="ml-2" />
+          </button>
         </div>
 
         {/* Mobile Menu Button */}
@@ -67,6 +81,15 @@ const Navbar = () => {
               {item.name}
             </Link>
           ))}
+
+          {/* Mobile Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full text-lg text-center py-2 text-red-400 hover:text-red-500 font-orbitron flex justify-center items-center"
+          >
+            <span className="font-orbitron">Logout</span>{" "}
+            <LogOut size={20} className="ml-2" />
+          </button>
         </div>
       )}
     </nav>
