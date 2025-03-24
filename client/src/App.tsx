@@ -14,6 +14,7 @@ import ChangePassword from "./pages/dashboard/ChangePassword";
 import MyQuestions from "./pages/dashboard/MyQuestions";
 import QuestionDetail from "./pages/Questions/ViewQuestion";
 import AddAnswer from "./pages/Questions/AddAnswer";
+import NotFound from "./pages/NotFound";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -96,6 +97,14 @@ const AnimatedRoutes = () => {
           element={
             <motion.div {...pageVariants}>
               <AddAnswer />
+            </motion.div>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <motion.div {...pageVariants}>
+              <NotFound />
             </motion.div>
           }
         />
