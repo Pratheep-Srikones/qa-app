@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useNavigate } from "react-router-dom";
+import { toastError } from "../../utils/toast";
 
 interface FormData {
   username: string;
@@ -15,6 +18,8 @@ interface FormErrors {
 }
 
 const SignupPage: React.FC = () => {
+  const { signup, isSigningUp } = useAuthStore();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     username: "",
     email: "",
@@ -96,9 +101,12 @@ const SignupPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormValid) {
+      toastError("Please fill in all fields correctly");
+      return;
+    }
     if (isFormValid) {
-      // Handle signup logic here
-      console.log("Form submitted:", formData);
+      signup(formData.username, formData.email, formData.password, navigate);
     }
   };
 
@@ -314,14 +322,14 @@ const SignupPage: React.FC = () => {
           <div>
             <button
               type="submit"
-              disabled={!isFormValid}
+              disabled={!isFormValid || isSigningUp}
               className={`w-full flex justify-center py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white ${
-                isFormValid
+                isFormValid && !isSigningUp
                   ? "bg-[#25054d] hover:bg-[#191322] focus:ring-2 focus:ring-cyan-500"
                   : "bg-gray-700 cursor-not-allowed"
               } transition duration-300`}
             >
-              Sign Up
+              {isSigningUp ? "Signing Up..." : "Sign Up"}
             </button>
           </div>
         </form>

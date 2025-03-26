@@ -21,6 +21,12 @@ func SetupRouter() *gin.Engine {
 	r.GET("/users/:user_id", controllers.GetUserByID)
 	r.POST("/auth/signup", controllers.CreateUser)
 	r.POST("/auth/login", controllers.LoginUser)
+	r.POST("/auth/logout", controllers.LogoutUser)
+
+	r.GET("/questions", controllers.GetAllQuestions)
+	r.GET("/questions/:user_id", controllers.GetQuestionsByUserID)
+	r.GET("/questions/latest", controllers.GetLatestQuestions)
+	r.POST("/questions", controllers.AddQuestion)
 
 	return r
 }

@@ -1,8 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X, LogOut } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
 
 const Navbar = () => {
+  const { logOut, isLoggingOut } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -10,8 +12,7 @@ const Navbar = () => {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const handleLogout = () => {
-    console.log("Logging out..."); // Replace with actual logout logic
-    navigate("/login"); // Redirect to login after logout
+    logOut(navigate);
   };
 
   const navItems = [
@@ -85,10 +86,21 @@ const Navbar = () => {
           {/* Mobile Logout Button */}
           <button
             onClick={handleLogout}
-            className="w-full text-lg text-center py-2 text-red-400 hover:text-red-500 font-orbitron flex justify-center items-center"
+            disabled={isLoggingOut}
+            className={`w-full text-lg text-center py-2 font-orbitron flex justify-center items-center ${
+              isLoggingOut
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-red-400 hover:text-red-500"
+            }`}
           >
-            <span className="font-orbitron">Logout</span>{" "}
-            <LogOut size={20} className="ml-2" />
+            {isLoggingOut ? (
+              <span className="font-orbitron">Logging out...</span>
+            ) : (
+              <>
+                <span className="font-orbitron">Logout</span>
+                <LogOut size={20} className="ml-2" />
+              </>
+            )}
           </button>
         </div>
       )}

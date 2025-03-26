@@ -32,3 +32,13 @@ export const signup = async (
     throw error as AxiosError;
   }
 };
+
+export const logout = async () => {
+  try {
+    const response = await axiosInstance.post("/auth/logout");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error as AxiosError;
+  }
+};

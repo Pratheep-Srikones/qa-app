@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { User } from "../types/types";
-import { login } from "../services/auth.services";
+import { login, logout, signup } from "../services/auth.services";
 import { toastError, toastSuccess } from "../utils/toast";
 
 interface AuthState {
@@ -24,7 +23,7 @@ interface AuthState {
   ) => void;
   isSigningUp: boolean;
 
-  logOut: () => void;
+  logOut: (navigate: (path: string) => void) => void;
   isLoggingOut: boolean;
 
   isauthLoading: boolean;
@@ -45,6 +44,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           const data = await login(username, password);
           set({ currUser: data.user, isAuthenticated: true });
+          localStorage.setItem("user_id", data.user.user_id);
           toastSuccess(data.message);
           navigate("/");
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,9 +57,38 @@ export const useAuthStore = create<AuthState>()(
         }
       },
       isLoggingIn: false,
-      signup: (_username: string, _email: string, _password: string) => {},
+      signup: async (
+        username: string,
+        email: string,
+        password: string,
+        navigate: (path: string) => void
+      ) => {
+        if (username === "" || email === "" || password === "") {
+          toastError("Please fill in all fields");
+          return;
+        }
+        set({ isSigningUp: true });
+
+        try {
+          const data = await signup(username, email, password);
+          toastSuccess(data.message);
+          navigate("/login");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          toastError(error.response?.data?.message || "Login failed");
+        } finally {
+          set({ isSigningUp: false });
+        }
+      },
       isSigningUp: false,
-      logOut: () => {},
+      logOut: (navigate: (path: string) => void) => {
+        set({ isLoggingOut: true });
+        logout();
+        localStorage.clear();
+        set({ currUser: null, isAuthenticated: false });
+        navigate("/login");
+        set({ isLoggingOut: false });
+      },
       isLoggingOut: false,
       isauthLoading: false,
     }),
