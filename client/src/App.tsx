@@ -15,6 +15,7 @@ import MyQuestions from "./pages/dashboard/MyQuestions";
 import QuestionDetail from "./pages/Questions/ViewQuestion";
 import AddAnswer from "./pages/Questions/AddAnswer";
 import NotFound from "./pages/NotFound";
+import { Toaster } from "react-hot-toast";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -109,6 +110,7 @@ const AnimatedRoutes = () => {
           }
         />
       </Routes>
+      <Toaster position="top-center" reverseOrder={false} />
     </AnimatePresence>
   );
 };

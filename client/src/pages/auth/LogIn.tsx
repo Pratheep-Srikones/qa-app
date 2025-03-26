@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { toastError } from "../../utils/toast";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useNavigate } from "react-router-dom";
 
 interface FormData {
   username: string;
@@ -6,6 +9,8 @@ interface FormData {
 }
 
 const LogInPage = () => {
+  const navigate = useNavigate();
+  const { login, isLoggingIn } = useAuthStore();
   const [formData, setFormData] = useState<FormData>({
     username: "",
     password: "",
@@ -23,11 +28,11 @@ const LogInPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.username.length < 8 || !formData.password) {
-      console.log("Form is invalid");
+    if (!formData.username || !formData.password) {
+      toastError("Please fill in all fields");
       return;
     }
-    console.log("Form submitted:", formData);
+    login(formData.username, formData.password, navigate);
   };
 
   return (
@@ -125,9 +130,14 @@ const LogInPage = () => {
           <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-[#25054d] hover:bg-[#191322] "
+              disabled={isLoggingIn}
+              className={`w-full flex justify-center py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white ${
+                isLoggingIn
+                  ? "bg-gray-600 cursor-not-allowed"
+                  : "bg-[#25054d] hover:bg-[#191322]"
+              }`}
             >
-              Log In
+              {isLoggingIn ? "Logging In..." : "Log In"}
             </button>
           </div>
         </form>
