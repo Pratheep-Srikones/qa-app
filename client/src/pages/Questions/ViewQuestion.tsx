@@ -1,65 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useParams, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { ArrowUp, ArrowDown, Bot } from "lucide-react";
+import { useQuestionStore } from "../../store/useQuestionStore";
+import Loading from "../../components/Loading";
 
 const QuestionDetail = () => {
-  const { id } = useParams();
-
   // Mock data for the question
-  const [question, setQuestion] = useState({
-    id,
-    title: "How does React handle state updates?",
-    description:
-      "React updates the state asynchronously and batches multiple state updates to improve performance.",
-    images: ["https://picsum.photos/200", "https://picsum.photos/200"],
-    answers: [
-      {
-        id: 1,
-        content:
-          "React batches multiple state updates to optimize re-rendering.",
-        upvotes: 12,
-        downvotes: 2,
-      },
-      {
-        id: 2,
-        content: "State updates in React are scheduled asynchronously.",
-        upvotes: 8,
-        downvotes: 1,
-      },
-    ],
-  });
 
-  const [aiAnswer, setAiAnswer] = useState(
-    "React batches multiple state updates and uses a virtual DOM to efficiently update UI components."
-  );
+  const { selectedQuestion } = useQuestionStore();
 
-  // Fetch question details (Replace this with API call)
-  useEffect(() => {
-    // fetch(`/api/questions/${id}`)
-    //   .then(res => res.json())
-    //   .then(data => setQuestion(data))
-    //   .catch(err => console.error("Error fetching question:", err));
-  }, [id]);
+  console.log(selectedQuestion);
 
-  const handleUpvote = (index: number) => {
-    setQuestion((prev) => {
-      const newAnswers = [...prev.answers];
-      newAnswers[index].upvotes += 1;
-      return { ...prev, answers: newAnswers };
-    });
-  };
-
-  const handleDownvote = (index: number) => {
-    setQuestion((prev) => {
-      const newAnswers = [...prev.answers];
-      newAnswers[index].downvotes += 1;
-      return { ...prev, answers: newAnswers };
-    });
-  };
-
+  if (!selectedQuestion) {
+    return <Loading />;
+  }
   return (
     <>
       {/* Navbar */}
@@ -79,32 +35,35 @@ const QuestionDetail = () => {
           exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
         >
           {/* Question Title */}
-          <h1 className="text-3xl font-bold text-white">{question.title}</h1>
+          <h1 className="text-3xl font-bold text-white">
+            {selectedQuestion?.title}
+          </h1>
           {/* User Name */}
           <p className="text-gray-400 mt-2">
             Asked by:{" "}
             <span className="text-purple-400 font-semibold">User123</span>
           </p>
           {/* Answer Count */}
-          <p className="text-gray-400 mt-1">
-            {question.answers.length} Answers
-          </p>
+          <p className="text-gray-400 mt-1">{0} Answers</p>
 
           {/* Question Description */}
-          <p className="text-gray-300 mt-4">{question.description}</p>
+          <p className="text-gray-300 mt-4">{selectedQuestion?.description}</p>
 
           {/* Images */}
-          <div className="mt-4 flex space-x-4">
-            {question.images.map((img, index) => (
-              <motion.img
-                key={index}
-                src={img}
-                alt="Question Related"
-                className="w-1/2 rounded-lg shadow-md"
-                whileHover={{ scale: 1.05 }}
-              />
-            ))}
-          </div>
+          {selectedQuestion?.image_urls &&
+            selectedQuestion?.image_urls.length > 0 && (
+              <div className="mt-4 flex space-x-4">
+                {selectedQuestion?.image_urls.map((img, index) => (
+                  <motion.img
+                    key={index}
+                    src={img}
+                    alt="Question Related"
+                    className="w-1/2 rounded-lg shadow-md"
+                    whileHover={{ scale: 1.05 }}
+                  />
+                ))}
+              </div>
+            )}
 
           {/* Add Answer Button */}
           <Link to={`/answer`}>
@@ -133,30 +92,31 @@ const QuestionDetail = () => {
             </div>
 
             {/* AI Answer Content */}
-            <p className="text-gray-300 mt-3 leading-relaxed">{aiAnswer}</p>
+            <p className="text-gray-300 mt-3 leading-relaxed">
+              {selectedQuestion?.ai_answer}
+            </p>
           </motion.div>
 
           {/* User Answers */}
           <div className="mt-6">
             <h2 className="text-xl font-bold text-white">User Answers</h2>
-            {question.answers.length > 0 ? (
+            {/* {question.answers.length > 0 ? (
               question.answers.map((answer, index) => (
                 <motion.div
                   key={answer.id}
                   className="mt-4 p-4 bg-black/30 border border-gray-700 rounded-lg shadow-md transition-all duration-300 hover:bg-black/50"
                   whileHover={{ scale: 1.02 }}
                 >
-                  {/* User Info */}
+                 
                   <div className="flex items-center space-x-3 mb-2">
                     <span className="text-purple-400 font-semibold">
                       User{answer.id}
                     </span>
                   </div>
 
-                  {/* Answer Content */}
+                  
                   <p className="text-gray-300">{answer.content}</p>
 
-                  {/* Upvote/Downvote */}
                   <div className="flex justify-between mt-2">
                     <div className="flex items-center space-x-2">
                       <button
@@ -179,7 +139,7 @@ const QuestionDetail = () => {
               ))
             ) : (
               <p className="text-gray-400 text-center mt-4">No answers yet.</p>
-            )}
+            )} */}
           </div>
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-br from-[#12012c] via-[#0a0a0a] to-[#25054d] opacity-80 blur-2xl"></div>

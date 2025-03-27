@@ -1,38 +1,38 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import { useQuestionStore } from "../../store/useQuestionStore";
+import { useAuthStore } from "../../store/useAuthStore";
+import Loading from "../../components/Loading";
+import { formatDateTime } from "../../utils/format";
+import { Question } from "../../types/types";
+import { useNavigate } from "react-router-dom";
 
 const MyQuestions = () => {
-  const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      title: "How does React handle state updates?",
-      date: "March 14, 2025",
-      answers: 5,
-    },
-    {
-      id: 2,
-      title: "What is the difference between useEffect and useLayoutEffect?",
-      date: "March 12, 2025",
-      answers: 3,
-    },
-    {
-      id: 3,
-      title: "How to optimize a large-scale React application?",
-      date: "March 10, 2025",
-      answers: 8,
-    },
-  ]);
+  const {
+    fetchQuestionsByUser,
+    fetchedQuestions,
+    isFetchingQuestions,
+    setSelectedQuestion,
+  } = useQuestionStore();
+  const { currUser } = useAuthStore();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch user's questions from API (replace with real API call)
-    // fetch("/api/my-questions")
-    //   .then(res => res.json())
-    //   .then(data => setQuestions(data))
-    //   .catch(err => console.error("Error fetching questions:", err));
-  }, []);
+    if (currUser) {
+      fetchQuestionsByUser(currUser.user_id);
+    }
+  }, [currUser, fetchQuestionsByUser]);
+
+  function handleOpenQuestion(
+    event: React.MouseEvent<HTMLButtonElement>,
+    question: Question
+  ): void {
+    event.preventDefault();
+    setSelectedQuestion(question);
+    navigate(`/question`);
+  }
 
   return (
     <>
@@ -58,39 +58,48 @@ const MyQuestions = () => {
           </h1>
 
           {/* List of Questions */}
-          <motion.div
-            className="space-y-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.2 } }}
-          >
-            {questions.length > 0 ? (
-              questions.map((question, index) => (
-                <motion.div
-                  key={question.id}
-                  className="p-4 bg-black/30 border border-gray-800 rounded-lg shadow-lg transition-all duration-300 hover:bg-black/50 hover:shadow-xl"
-                  whileHover={{ scale: 1.02 }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    transition: { delay: index * 0.1 },
-                  }}
-                >
-                  <Link to={`/question/${question.id}`} className="block">
-                    <h2 className="text-lg font-semibold text-white">
-                      {question.title}
-                    </h2>
-                    <div className="text-sm text-gray-400 mt-1 flex justify-between">
-                      <span>{question.date}</span>
-                      <span>{question.answers} Answers</span>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))
-            ) : (
-              <p className="text-gray-400 text-center">No questions found.</p>
-            )}
-          </motion.div>
+          {isFetchingQuestions ? (
+            <Loading />
+          ) : (
+            <motion.div
+              className="space-y-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.2 } }}
+            >
+              {fetchedQuestions && fetchedQuestions.length > 0 ? (
+                fetchedQuestions.map((question, index) => (
+                  <motion.div
+                    key={question.question_id}
+                    className="p-4 bg-black/30 border border-gray-800 rounded-lg shadow-lg transition-all duration-300 hover:bg-black/50 hover:shadow-xl"
+                    whileHover={{ scale: 1.02 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: { delay: index * 0.1 },
+                    }}
+                  >
+                    <button
+                      onClick={(e) => {
+                        handleOpenQuestion(e, question);
+                      }}
+                      className="block"
+                    >
+                      <h2 className="text-lg font-semibold text-white">
+                        {question.title}
+                      </h2>
+                      <div className="text-sm text-gray-400 mt-1 flex justify-between">
+                        <span>{formatDateTime(question.asked_at, 2)}</span>
+                        <span>{0} Answers</span>
+                      </div>
+                    </button>
+                  </motion.div>
+                ))
+              ) : (
+                <p className="text-gray-400 text-center">No questions found.</p>
+              )}
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </>
