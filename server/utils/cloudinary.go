@@ -12,6 +12,7 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
+	"github.com/google/uuid"
 )
 
 func Credentials() (*cloudinary.Cloudinary, context.Context, error) {
@@ -26,7 +27,7 @@ func Credentials() (*cloudinary.Cloudinary, context.Context, error) {
 
 func UploadImage(cld *cloudinary.Cloudinary, ctx context.Context, file io.Reader) (string, error) {
 	resp, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
-		PublicID:       "uploaded_image",
+		PublicID:       uuid.New().String(),
 		UniqueFilename: api.Bool(true),
 		Overwrite:      api.Bool(false),
 	})

@@ -52,13 +52,13 @@ const QuestionDetail = () => {
           {/* Images */}
           {selectedQuestion?.image_urls &&
             selectedQuestion?.image_urls.length > 0 && (
-              <div className="mt-4 flex space-x-4">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {selectedQuestion?.image_urls.map((img, index) => (
                   <motion.img
                     key={index}
                     src={img}
                     alt="Question Related"
-                    className="w-1/2 rounded-lg shadow-md"
+                    className="w-full h-auto rounded-lg shadow-md object-cover"
                     whileHover={{ scale: 1.05 }}
                   />
                 ))}
