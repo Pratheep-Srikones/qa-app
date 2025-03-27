@@ -34,13 +34,15 @@ export const getLatestQuestions = async () => {
 export const addQuestion = async (
   title: string,
   description: string,
-  user_id: string
+  user_id: string,
+  image_urls: string[]
 ) => {
   try {
     const response = await axiosInstance.post("/questions", {
       title,
       description,
       user_id,
+      image_urls,
     });
     return response.data;
   } catch (error) {
