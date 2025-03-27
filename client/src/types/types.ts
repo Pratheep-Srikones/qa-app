@@ -14,3 +14,8 @@ export interface Question {
   asked_at: string;
   ai_answer: string;
 }
+
+export interface TopTags {
+  tag: string;
+  count: number;
+}

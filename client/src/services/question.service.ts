@@ -31,6 +31,15 @@ export const getLatestQuestions = async () => {
   }
 };
 
+export const getQuestionByTag = async (tag: string) => {
+  try {
+    const response = await axiosInstance.get(`/questions/tag/${tag}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error while fetching questions by tag: ", error);
+    throw error as AxiosError;
+  }
+};
 export const addQuestion = async (
   title: string,
   description: string,
@@ -47,6 +56,29 @@ export const addQuestion = async (
     return response.data;
   } catch (error) {
     console.error("Error while adding question: ", error);
+    throw error as AxiosError;
+  }
+};
+
+export const addTags = async (question_id: string, tags: string[]) => {
+  try {
+    const response = await axiosInstance.post(
+      `questions/tags/${question_id}`,
+      tags
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error while adding tags: ", error);
+    throw error as AxiosError;
+  }
+};
+
+export const getTagsByQuestionId = async (question_id: string) => {
+  try {
+    const response = await axiosInstance.get(`/tags/${question_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error while fetching tags by question id: ", error);
     throw error as AxiosError;
   }
 };

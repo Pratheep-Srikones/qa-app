@@ -16,6 +16,7 @@ import QuestionDetail from "./pages/Questions/ViewQuestion";
 import AddAnswer from "./pages/Questions/AddAnswer";
 import NotFound from "./pages/NotFound";
 import { Toaster } from "react-hot-toast";
+import TaggedQuestions from "./pages/dashboard/TagQuestions";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -90,6 +91,14 @@ const AnimatedRoutes = () => {
           element={
             <motion.div {...pageVariants}>
               <QuestionDetail />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/questions/tagged"
+          element={
+            <motion.div {...pageVariants}>
+              <TaggedQuestions />
             </motion.div>
           }
         />

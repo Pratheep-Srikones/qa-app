@@ -3,7 +3,7 @@ import { XCircle, PlusCircle, CloudUpload } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import { uploadImages } from "../../services/upload.services";
 import { toastError, toastSuccess } from "../../utils/toast";
-import { addQuestion } from "../../services/question.service";
+import { addQuestion, addTags } from "../../services/question.service";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNavigate } from "react-router";
 
@@ -85,12 +85,14 @@ const AskQuestion = () => {
       return toastError("Please upload images");
     }
     try {
-      await addQuestion(
+      const response = await addQuestion(
         formData.title,
         formData.description,
         currUser?.user_id || "",
         imageUrls
       );
+
+      await addTags(response.question.question_id, formData.tags);
       toastSuccess("Question added successfully");
       navigate("/");
     } catch (error) {

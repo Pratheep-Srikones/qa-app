@@ -27,6 +27,12 @@ func SetupRouter() *gin.Engine {
 	r.GET("/questions/:user_id", controllers.GetQuestionsByUserID)
 	r.GET("/questions/latest", controllers.GetLatestQuestions)
 	r.POST("/questions", controllers.AddQuestion)
+	r.POST("/questions/tags/:question_id", controllers.AddTagsToQuestions)
+	r.GET("/questions/tag/:tag", controllers.GetQuestionsByTag)
+
+	r.GET("/tags/:question_id", controllers.GetTagsByQuestionID)
+	r.GET("/tags/top", controllers.GetTopTags)
+
 
 	r.POST("/upload", controllers.UploadMultipleImagesHandler)
 

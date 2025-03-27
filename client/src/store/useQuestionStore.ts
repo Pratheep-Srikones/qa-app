@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import { toastError } from "../utils/toast";
 import {
   getLatestQuestions,
+  getQuestionByTag,
   getQuestionsByUserId,
 } from "../services/question.service";
 
@@ -16,6 +17,10 @@ interface QuestionState {
 
   fetchQuestionsByUser: (user_id: string) => Promise<void>;
   fetchLatestQuestions: () => Promise<void>;
+
+  tag: string | null;
+  setTag: (tag: string) => void;
+  fetchQuestionsByTag: (tag: string) => Promise<void>;
 }
 
 export const useQuestionStore = create<QuestionState>()(
@@ -49,6 +54,25 @@ export const useQuestionStore = create<QuestionState>()(
           set({ fetchedQuestions: data.questions });
         } catch (error) {
           toastError("Error while fetching questions");
+        } finally {
+          set({ isFetchingQuestions: false });
+        }
+      },
+      tag: null,
+      setTag: (tag: string) => {
+        set({ tag });
+      },
+      fetchQuestionsByTag: async (tag: string) => {
+        if (tag === "") {
+          toastError("Tag is required");
+          return;
+        }
+        set({ isFetchingQuestions: true });
+        try {
+          const data = await getQuestionByTag(tag);
+          set({ fetchedQuestions: data.questions });
+        } catch (error) {
+          toastError("Error while fetching questions by tag");
         } finally {
           set({ isFetchingQuestions: false });
         }

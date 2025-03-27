@@ -1,21 +1,42 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { ArrowUp, ArrowDown, Bot } from "lucide-react";
 import { useQuestionStore } from "../../store/useQuestionStore";
 import Loading from "../../components/Loading";
+import { useEffect, useState } from "react";
+import { getTagsByQuestionId } from "../../services/question.service";
 
 const QuestionDetail = () => {
-  // Mock data for the question
+  const { setTag } = useQuestionStore();
+  const navigate = useNavigate();
+  const handleTagSelection = (tag: string) => {
+    setTag(tag);
+    navigate(`/questions/tagged`);
+  };
 
   const { selectedQuestion } = useQuestionStore();
+  const [tags, setTags] = useState<string[]>([]);
 
-  console.log(selectedQuestion);
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await getTagsByQuestionId(
+          selectedQuestion?.question_id as string
+        );
+        setTags(response.tags);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+    fetchTags();
+  }, [selectedQuestion]);
 
   if (!selectedQuestion) {
     return <Loading />;
   }
+
   return (
     <>
       {/* Navbar */}
@@ -48,6 +69,21 @@ const QuestionDetail = () => {
 
           {/* Question Description */}
           <p className="text-gray-300 mt-4">{selectedQuestion?.description}</p>
+          {/* Tags Section */}
+          <div className="mt-4">
+            <div className="mt-4 flex gap-2 flex-wrap justify-center md:justify-start">
+              {tags &&
+                tags.map((tag) => (
+                  <span
+                    onClick={() => handleTagSelection(tag)}
+                    key={tag}
+                    className="px-3 py-1 bg-purple-700 text-white text-sm rounded-lg cursor-pointer hover:bg-purple-800 transition"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+            </div>
+          </div>
 
           {/* Images */}
           {selectedQuestion?.image_urls &&

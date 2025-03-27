@@ -2,30 +2,41 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { useQuestionStore } from "../../store/useQuestionStore";
 import Loading from "../../components/Loading";
-import { useEffect } from "react";
-import { Question } from "../../types/types";
+import { useEffect, useState } from "react";
+import { Question, TopTags } from "../../types/types";
 import { toastError } from "../../utils/toast";
+import { getTopTags } from "../../services/tag.services";
 
 const Home = () => {
+  const { setTag } = useQuestionStore();
+
   const {
     isFetchingQuestions,
     fetchLatestQuestions,
     fetchedQuestions,
     setSelectedQuestion,
   } = useQuestionStore();
-
+  const [topTags, setTopTags] = useState<TopTags[]>([]);
   const navigate = useNavigate();
+  const handleTagSelection = (tag: string) => {
+    setTag(tag);
+    navigate(`/questions/tagged`);
+  };
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchData = async () => {
       try {
         await fetchLatestQuestions();
+        setTimeout(async () => {
+          const topTagsResponse = await getTopTags();
+          setTopTags(topTagsResponse.tags);
+        }, 1000);
       } catch (error) {
         console.error("Error while fetching questions:", error);
         toastError("Error while fetching questions");
       }
     };
 
-    fetchQuestions();
+    fetchData();
   }, [fetchLatestQuestions]);
 
   const handleNavigation = (question: Question) => {
@@ -96,14 +107,16 @@ const Home = () => {
             Popular Tags
           </h2>
           <div className="mt-4 flex gap-2 flex-wrap justify-center md:justify-start">
-            {["JavaScript", "Next.js", "AI", "Web3"].map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 bg-purple-700 text-white text-sm rounded-lg cursor-pointer hover:bg-purple-800 transition"
-              >
-                #{tag}
-              </span>
-            ))}
+            {topTags &&
+              topTags.map((tag) => (
+                <span
+                  onClick={() => handleTagSelection(tag.tag)}
+                  key={tag.tag}
+                  className="px-3 py-1 bg-purple-700 text-white text-sm rounded-lg cursor-pointer hover:bg-purple-800 transition"
+                >
+                  #{tag.tag} ({tag.count})
+                </span>
+              ))}
           </div>
         </div>
       </div>
