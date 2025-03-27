@@ -1,23 +1,31 @@
 import { useState } from "react";
 import { XCircle, PlusCircle, CloudUpload } from "lucide-react";
 import Navbar from "../../components/Navbar";
+import { uploadImages } from "../../services/upload.services";
+import { toastError, toastSuccess } from "../../utils/toast";
+import { addQuestion } from "../../services/question.service";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useNavigate } from "react-router";
 
 const AskQuestion = () => {
+  const { currUser } = useAuthStore();
+  const navigate = useNavigate();
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [formData, setFormData] = useState({
-    question: "",
+    title: "",
     description: "",
     images: [] as File[],
     tagInput: "",
     tags: [] as string[],
   });
-
+  const [fileUploaded, setFileUploaded] = useState(false);
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileAddition = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFormData({
         ...formData,
@@ -26,6 +34,19 @@ const AskQuestion = () => {
     }
   };
 
+  const uploadFiles = async () => {
+    try {
+      const response = await uploadImages(
+        formData.images as unknown as FileList
+      );
+      setImageUrls(response.image_urls);
+      toastSuccess("Images uploaded successfully");
+      setFileUploaded(true);
+    } catch (error) {
+      toastError("Failed to upload images");
+      console.log(error);
+    }
+  };
   const handleRemoveImage = (index: number) => {
     setFormData({
       ...formData,
@@ -53,6 +74,30 @@ const AskQuestion = () => {
     });
   };
 
+  const handleSubmit = async () => {
+    if (!formData.title.trim()) {
+      return toastError("Question is required");
+    }
+    if (!formData.description.trim()) {
+      return toastError("Description is required");
+    }
+    if (formData.images.length > 0 && !fileUploaded) {
+      return toastError("Please upload images");
+    }
+    try {
+      await addQuestion(
+        formData.title,
+        formData.description,
+        currUser?.user_id || "",
+        imageUrls
+      );
+      toastSuccess("Question added successfully");
+      navigate("/");
+    } catch (error) {
+      toastError("Failed to add question");
+      console.log(error);
+    }
+  };
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-[#0a0a0a] text-white">
       <div className="z-30 fixed top-0 left-0 w-full">
@@ -70,8 +115,8 @@ const AskQuestion = () => {
           </label>
           <input
             type="text"
-            name="question"
-            value={formData.question}
+            name="title"
+            value={formData.title}
             onChange={handleInputChange}
             className="w-full px-4 py-3 mt-1 bg-gray-900 text-white rounded-lg border border-gray-700 focus:ring-2 focus:ring-purple-500"
             placeholder="Enter your question..."
@@ -103,10 +148,11 @@ const AskQuestion = () => {
               type="file"
               multiple
               accept="image/*"
-              onChange={handleFileUpload}
+              onChange={handleFileAddition}
               className="w-full px-3 py-2 bg-gray-900 text-gray-400 rounded-lg border border-gray-700 cursor-pointer focus:ring-2 focus:ring-purple-500"
             />
             <button
+              onClick={uploadFiles}
               type="button"
               className="bg-purple-600 hover:bg-purple-700 p-2 rounded-full transition-all"
             >
@@ -181,7 +227,10 @@ const AskQuestion = () => {
         )}
 
         {/* Submit Button */}
-        <button className="w-full py-3 text-lg font-semibold bg-purple-600 hover:bg-purple-700 rounded-lg transition-all duration-300 text-white shadow-md">
+        <button
+          onClick={handleSubmit}
+          className="w-full py-3 text-lg font-semibold bg-purple-600 hover:bg-purple-700 rounded-lg transition-all duration-300 text-white shadow-md"
+        >
           Submit Question
         </button>
       </div>

@@ -28,5 +28,7 @@ func SetupRouter() *gin.Engine {
 	r.GET("/questions/latest", controllers.GetLatestQuestions)
 	r.POST("/questions", controllers.AddQuestion)
 
+	r.POST("/upload", controllers.UploadMultipleImagesHandler)
+
 	return r
 }
