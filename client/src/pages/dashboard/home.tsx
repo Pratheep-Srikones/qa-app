@@ -1,7 +1,38 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import { useQuestionStore } from "../../store/useQuestionStore";
+import Loading from "../../components/Loading";
+import { useEffect } from "react";
+import { Question } from "../../types/types";
+import { toastError } from "../../utils/toast";
 
 const Home = () => {
+  const {
+    isFetchingQuestions,
+    fetchLatestQuestions,
+    fetchedQuestions,
+    setSelectedQuestion,
+  } = useQuestionStore();
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        await fetchLatestQuestions();
+      } catch (error) {
+        console.error("Error while fetching questions:", error);
+        toastError("Error while fetching questions");
+      }
+    };
+
+    fetchQuestions();
+  }, [fetchLatestQuestions]);
+
+  const handleNavigation = (question: Question) => {
+    setSelectedQuestion(question);
+    navigate(`/question`);
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
       <div className="z-30 fixed top-0 left-0 w-full">
@@ -38,20 +69,25 @@ const Home = () => {
           <h2 className="text-2xl font-bold text-center md:text-left">
             Latest Questions
           </h2>
-          <div className="mt-4 space-y-4">
-            {[1, 2, 3].map((q) => (
-              <Link
-                to={`/question/${q}`}
-                key={q}
-                className="block p-4 bg-gray-900 rounded-lg hover:bg-gray-800 transition-all w-full max-w-2xl mx-auto md:max-w-full"
-              >
-                <h3 className="text-lg font-semibold">
-                  How does React Server Components work?
-                </h3>
-                <p className="text-gray-400 text-sm">3 answers • 15 votes</p>
-              </Link>
-            ))}
-          </div>
+          {isFetchingQuestions ? (
+            <Loading />
+          ) : (
+            <div className="mt-4 space-y-4">
+              {fetchedQuestions &&
+                fetchedQuestions.map((question) => (
+                  <button
+                    onClick={() => handleNavigation(question)}
+                    key={question.question_id}
+                    className="block p-4 bg-gray-900 rounded-lg hover:bg-gray-800 transition-all w-full max-w-2xl mx-auto md:max-w-full"
+                  >
+                    <h3 className="text-lg font-semibold">{question.title}</h3>
+                    <p className="text-gray-400 text-sm">
+                      3 answers • 15 votes
+                    </p>
+                  </button>
+                ))}
+            </div>
+          )}
         </div>
 
         {/* Popular Tags */}

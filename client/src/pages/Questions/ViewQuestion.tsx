@@ -87,7 +87,7 @@ const QuestionDetail = () => {
             <div className="flex items-center space-x-3">
               <Bot size={28} className="text-purple-400 animate-pulse" />
               <h2 className="text-xl font-bold text-purple-400 tracking-wider">
-                AI Answer
+                Sparc Bot Overview
               </h2>
             </div>
 
