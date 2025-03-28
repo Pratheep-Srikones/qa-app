@@ -16,6 +16,10 @@ export const formatDateTime = (dateStr: string, format: number): string => {
       ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
     case 4: // Format: Full readable date
       return date.toLocaleString();
+    case 5: // Format DD Month YYYY
+      return `${String(date.getDate()).padStart(2, "0")} ${date
+        .toLocaleString("default", { month: "long" })
+        .toLowerCase()} ${date.getFullYear()}`;
     default:
       throw new Error("Invalid format number");
   }

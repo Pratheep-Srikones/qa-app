@@ -1,53 +1,19 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Mail, BarChart, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "../../components/Navbar";
+import { useAuthStore } from "../../store/useAuthStore";
+import { formatDateTime } from "../../utils/format";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
+  const { currUser } = useAuthStore();
 
   // Hardcoded user data
-  const user = {
-    username: "CyberWarrior",
-    email: "cyberwarrior@example.com",
-    questionsAsked: 23,
-    answersProvided: 45,
-    upvotes: 128,
-    downvotes: 8,
-    memberSince: "March 2023",
-  };
 
   // State for animated counters
-  const [counts, setCounts] = useState({
-    questions: 0,
-    answers: 0,
-    upvotes: 0,
-    downvotes: 0,
-  });
 
   // Animate numbers on mount
-  useEffect(() => {
-    const animateCount = (key: keyof typeof counts, value: number) => {
-      let start = 0;
-      const duration = 1000; // Animation duration in ms
-      const increment = Math.ceil(value / (duration / 30)); // Calculate increment steps
-
-      const interval = setInterval(() => {
-        start += increment;
-        if (start >= value) {
-          start = value;
-          clearInterval(interval);
-        }
-        setCounts((prev) => ({ ...prev, [key]: start }));
-      }, 30);
-    };
-
-    animateCount("questions", user.questionsAsked);
-    animateCount("answers", user.answersProvided);
-    animateCount("upvotes", user.upvotes);
-    animateCount("downvotes", user.downvotes);
-  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-[#0a0a0a] text-white">
@@ -79,7 +45,7 @@ const ProfilePage = () => {
             transition={{ delay: 0.3 }}
           >
             <User size={24} className="text-purple-400" />
-            <span className="text-lg">{user.username}</span>
+            <span className="text-lg">{currUser?.username}</span>
           </motion.div>
 
           <motion.div
@@ -89,7 +55,7 @@ const ProfilePage = () => {
             transition={{ delay: 0.4 }}
           >
             <Mail size={24} className="text-purple-400" />
-            <span className="text-lg">{user.email}</span>
+            <span className="text-lg">{currUser?.email}</span>
           </motion.div>
 
           <motion.div
@@ -99,29 +65,10 @@ const ProfilePage = () => {
             transition={{ delay: 0.5 }}
           >
             <BarChart size={24} className="text-purple-400" />
-            <span className="text-lg">Member since: {user.memberSince}</span>
+            <span className="text-lg">
+              Member since: {formatDateTime(currUser?.created_at || "", 5)}
+            </span>
           </motion.div>
-        </div>
-
-        {/* Statistics */}
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            { label: "Questions Asked", count: counts.questions },
-            { label: "Answers Provided", count: counts.answers },
-            { label: "Upvotes", count: counts.upvotes },
-            { label: "Downvotes", count: counts.downvotes },
-          ].map((stat, index) => (
-            <motion.div
-              key={index}
-              className="p-4 bg-purple-800/50 rounded-lg border border-purple-600 text-center"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-            >
-              <h3 className="text-2xl font-bold">{stat.count}</h3>
-              <p className="text-sm text-gray-300">{stat.label}</p>
-            </motion.div>
-          ))}
         </div>
 
         {/* Change Password Button */}
