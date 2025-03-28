@@ -19,6 +19,9 @@ func SetupRouter() *gin.Engine {
 	}))
 	r.GET("/users", controllers.GetUsers)
 	r.GET("/users/:user_id", controllers.GetUserByID)
+	r.GET("/users/username/:user_id", controllers.GetUsernameByID)
+
+	
 	r.POST("/auth/signup", controllers.CreateUser)
 	r.POST("/auth/login", controllers.LoginUser)
 	r.POST("/auth/logout", controllers.LogoutUser)
@@ -33,7 +36,10 @@ func SetupRouter() *gin.Engine {
 	r.GET("/tags/:question_id", controllers.GetTagsByQuestionID)
 	r.GET("/tags/top", controllers.GetTopTags)
 
-
+	r.GET("/answers/:question_id", controllers.GetAnswersForQuestion)
+	r.POST("/answers", controllers.AddAnswer)
+	r.GET("/answers/count/:question_id", controllers.GetAnswerCount)
+	
 	r.POST("/upload", controllers.UploadMultipleImagesHandler)
 
 	return r

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Question, TopTags } from "../../types/types";
 import { toastError } from "../../utils/toast";
 import { getTopTags } from "../../services/tag.services";
+import { formatTimeDifference } from "../../utils/format";
 
 const Home = () => {
   const { setTag } = useQuestionStore();
@@ -46,10 +47,10 @@ const Home = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
-      <div className="z-30 fixed top-0 left-0 w-full">
+      <div className="z-30 fixed top-0 left-0 w-full mb-10">
         <Navbar />
       </div>
-      <div className="min-h-screen bg-[#0a0a0a] text-white px-6 py-10 mt-6 z-20">
+      <div className="min-h-screen bg-[#0a0a0a] text-white px-6 py-10 mt-20 z-20">
         {/* Hero Section */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-purple-400 neon-glow">
@@ -91,10 +92,19 @@ const Home = () => {
                     key={question.question_id}
                     className="block p-4 bg-gray-900 rounded-lg hover:bg-gray-800 transition-all w-full max-w-2xl mx-auto md:max-w-full"
                   >
-                    <h3 className="text-lg font-semibold">{question.title}</h3>
-                    <p className="text-gray-400 text-sm">
-                      3 answers • 15 votes
-                    </p>
+                    <h3 className="text-lg font-semibold text-left">
+                      {question.title}
+                    </h3>
+                    {/* Meta Information */}
+                    <div className="text-sm text-gray-400 mt-1 flex justify-between items-center">
+                      <span>
+                        {question.description.split(" ").slice(0, 3).join(" ")}
+                        ...
+                      </span>
+                      <span className="text-[#7d0cff] font-medium">
+                        {formatTimeDifference(question.asked_at)}
+                      </span>
+                    </div>
                   </button>
                 ))}
             </div>

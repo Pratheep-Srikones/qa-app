@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from "zustand";
-import { Question } from "../types/types";
+import { Answer, Question } from "../types/types";
 import { persist } from "zustand/middleware";
 import { toastError } from "../utils/toast";
 import {
@@ -21,6 +21,9 @@ interface QuestionState {
   tag: string | null;
   setTag: (tag: string) => void;
   fetchQuestionsByTag: (tag: string) => Promise<void>;
+
+  selectedAnswer: Answer | null;
+  setSelectedAnswer: (answer: Answer) => void;
 }
 
 export const useQuestionStore = create<QuestionState>()(
@@ -76,6 +79,10 @@ export const useQuestionStore = create<QuestionState>()(
         } finally {
           set({ isFetchingQuestions: false });
         }
+      },
+      selectedAnswer: null,
+      setSelectedAnswer: (answer: Answer) => {
+        set({ selectedAnswer: answer });
       },
     }),
     {

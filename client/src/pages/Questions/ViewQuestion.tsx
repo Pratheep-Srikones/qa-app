@@ -1,24 +1,34 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
-import { ArrowUp, ArrowDown, Bot } from "lucide-react";
+import { Bot } from "lucide-react";
 import { useQuestionStore } from "../../store/useQuestionStore";
 import Loading from "../../components/Loading";
 import { useEffect, useState } from "react";
 import { getTagsByQuestionId } from "../../services/question.service";
+import { getAnswerByQuestionId } from "../../services/answer.services";
+import { Answer } from "../../types/types";
+import { getUserNameById } from "../../services/user.services";
+import { formatTimeDifference } from "../../utils/format";
 
 const QuestionDetail = () => {
-  const { setTag } = useQuestionStore();
+  const { setTag, setSelectedAnswer } = useQuestionStore();
   const navigate = useNavigate();
   const handleTagSelection = (tag: string) => {
     setTag(tag);
     navigate(`/questions/tagged`);
   };
 
+  const handleAnswerSelection = (answer: Answer) => {
+    setSelectedAnswer(answer);
+    navigate(`/answer/view`);
+  };
+
   const { selectedQuestion } = useQuestionStore();
   const [tags, setTags] = useState<string[]>([]);
-
+  const [authorName, setAuthorName] = useState<string>("");
+  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -30,7 +40,44 @@ const QuestionDetail = () => {
         console.error("Error fetching tags:", error);
       }
     };
-    fetchTags();
+
+    const fetchAnswers = async () => {
+      try {
+        setLoading(true);
+        const response = await getAnswerByQuestionId(
+          selectedQuestion?.question_id as string
+        );
+        setAnswers(response.answers);
+      } catch (error) {
+        console.error("Error fetching answers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchAuthorName = async () => {
+      try {
+        const response = await getUserNameById(
+          selectedQuestion?.user_id as string
+        );
+        setAuthorName(response.username);
+      } catch (error) {
+        console.error("Error fetching author name:", error);
+      }
+    };
+
+    const fetchData = async () => {
+      fetchTags();
+
+      setTimeout(async () => {
+        await fetchAnswers();
+        setTimeout(() => {
+          fetchAuthorName();
+        }, 2000);
+      }, 2000);
+    };
+
+    fetchData();
   }, [selectedQuestion]);
 
   if (!selectedQuestion) {
@@ -62,10 +109,14 @@ const QuestionDetail = () => {
           {/* User Name */}
           <p className="text-gray-400 mt-2">
             Asked by:{" "}
-            <span className="text-purple-400 font-semibold">User123</span>
+            <span className="text-purple-400 font-semibold">
+              {authorName || ""}
+            </span>
           </p>
           {/* Answer Count */}
-          <p className="text-gray-400 mt-1">{0} Answers</p>
+          <p className="text-gray-400 mt-1">
+            {answers ? answers.length : 0} Answers
+          </p>
 
           {/* Question Description */}
           <p className="text-gray-300 mt-4">{selectedQuestion?.description}</p>
@@ -136,46 +187,49 @@ const QuestionDetail = () => {
           {/* User Answers */}
           <div className="mt-6">
             <h2 className="text-xl font-bold text-white">User Answers</h2>
-            {/* {question.answers.length > 0 ? (
-              question.answers.map((answer, index) => (
-                <motion.div
-                  key={answer.id}
-                  className="mt-4 p-4 bg-black/30 border border-gray-700 rounded-lg shadow-md transition-all duration-300 hover:bg-black/50"
-                  whileHover={{ scale: 1.02 }}
-                >
-                 
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-purple-400 font-semibold">
-                      User{answer.id}
-                    </span>
-                  </div>
-
-                  
-                  <p className="text-gray-300">{answer.content}</p>
-
-                  <div className="flex justify-between mt-2">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleUpvote(index)}
-                        className="flex items-center text-green-400 hover:text-green-300 transition-all"
-                      >
-                        <ArrowUp size={18} />
-                        <span className="ml-1">{answer.upvotes}</span>
-                      </button>
-                      <button
-                        onClick={() => handleDownvote(index)}
-                        className="flex items-center text-red-400 hover:text-red-300 transition-all"
-                      >
-                        <ArrowDown size={18} />
-                        <span className="ml-1">{answer.downvotes}</span>
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))
+            {loading ? (
+              <div>
+                <p className="text-gray-400 text-center mt-4">
+                  Loading answers
+                  <motion.span
+                    className="inline-block"
+                    animate={{ opacity: [0.2, 1, 0.2] }}
+                    transition={{ repeat: Infinity, duration: 1 }}
+                  >
+                    ...
+                  </motion.span>
+                </p>
+              </div>
             ) : (
-              <p className="text-gray-400 text-center mt-4">No answers yet.</p>
-            )} */}
+              <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 p-2 rounded-lg">
+                {answers && answers.length > 0 ? (
+                  answers.map((answer) => (
+                    <motion.div
+                      key={answer.answer_id}
+                      className="mt-4 p-4 bg-black/30 border border-gray-700 rounded-lg shadow-md transition-all duration-300 hover:bg-black/50"
+                      whileHover={{ scale: 1.02 }}
+                      onClick={() => handleAnswerSelection(answer)}
+                    >
+                      {/* User Info */}
+                      <div className="flex items-center space-x-3 mb-2">
+                        <span className="text-purple-400 font-semibold">
+                          Answered {formatTimeDifference(answer.answered_at)}
+                        </span>
+                      </div>
+
+                      {/* Answer Text */}
+                      <p className="text-gray-300">{answer.answer}</p>
+
+                      {/* Voting Section */}
+                    </motion.div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-center mt-4">
+                    No answers yet.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-br from-[#12012c] via-[#0a0a0a] to-[#25054d] opacity-80 blur-2xl"></div>

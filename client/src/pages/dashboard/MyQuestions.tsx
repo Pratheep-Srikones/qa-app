@@ -4,7 +4,7 @@ import Navbar from "../../components/Navbar";
 import { useQuestionStore } from "../../store/useQuestionStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import Loading from "../../components/Loading";
-import { formatDateTime } from "../../utils/format";
+import { formatTimeDifference } from "../../utils/format";
 import { Question } from "../../types/types";
 import { useNavigate } from "react-router-dom";
 
@@ -94,9 +94,15 @@ const MyQuestions = () => {
 
                         {/* Meta Information */}
                         <div className="text-sm text-gray-400 mt-1 flex justify-between items-center">
-                          <span>{formatDateTime(question.asked_at, 2)}</span>
+                          <span>
+                            {question.description
+                              .split(" ")
+                              .slice(0, 3)
+                              .join(" ")}
+                            ...
+                          </span>
                           <span className="text-[#7d0cff] font-medium">
-                            {0} Answers
+                            {formatTimeDifference(question.asked_at)}
                           </span>
                         </div>
 

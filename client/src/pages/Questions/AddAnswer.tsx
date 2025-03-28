@@ -1,25 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import { useQuestionStore } from "../../store/useQuestionStore";
+import { useAuthStore } from "../../store/useAuthStore";
+import { addAnswer } from "../../services/answer.services";
+import { toastError, toastSuccess } from "../../utils/toast";
 
 const AddAnswer = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
 
-  // Mock question data (Replace with API fetch)
-  const [question, setQuestion] = useState({
-    id,
-    title: "How does React handle state updates?",
-    description:
-      "React updates the state asynchronously and batches multiple state updates to improve performance.",
-  });
+  const { selectedQuestion } = useQuestionStore();
+  const { currUser } = useAuthStore();
 
   const [answer, setAnswer] = useState("");
 
   // Handle answer submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (answer.trim() === "") {
@@ -27,11 +25,22 @@ const AddAnswer = () => {
       return;
     }
 
-    // Simulate API request (Replace with real API call)
-    console.log(`Submitting answer: ${answer}`);
-
-    // Redirect back to question page
-    navigate(`/question/${id}`);
+    try {
+      if (!selectedQuestion?.question_id) {
+        toastError("No question selected.");
+        return;
+      }
+      if (!currUser?.user_id) {
+        toastError("No user logged in.");
+        return;
+      }
+      await addAnswer(selectedQuestion?.question_id, answer, currUser?.user_id);
+      toastSuccess("Answer submitted successfully!");
+      navigate("/question");
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+      toastError("Failed to submit answer. Please try again.");
+    }
   };
 
   return (
@@ -53,10 +62,12 @@ const AddAnswer = () => {
           exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
         >
           {/* Question Title */}
-          <h1 className="text-3xl font-bold text-white">{question.title}</h1>
+          <h1 className="text-3xl font-bold text-white">
+            {selectedQuestion?.title}
+          </h1>
 
           {/* Question Description */}
-          <p className="text-gray-300 mt-4">{question.description}</p>
+          <p className="text-gray-300 mt-4">{selectedQuestion?.description}</p>
 
           {/* Answer Input */}
           <form onSubmit={handleSubmit} className="mt-6">

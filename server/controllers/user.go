@@ -47,7 +47,18 @@ func GetUserByID (c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": user, "message": "user fetched successfully"})
 
 }
+func GetUsernameByID (c *gin.Context) {
+	var user models.User
+	err := config.DB.QueryRow(context.Background(), "SELECT username FROM users WHERE user_id = $1", c.Param("user_id")).Scan(&user.Username)
 
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "Internal server error"})
+		fmt.Println(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"username": user.Username, "message": "username fetched successfully"})
+}
 func CreateUser (c *gin.Context) {
 	var newUser models.User
 

@@ -19,3 +19,13 @@ export interface TopTags {
   tag: string;
   count: number;
 }
+
+export interface Answer {
+  upvotes: number;
+  downvotes: number;
+  answer_id: string;
+  question_id: string;
+  user_id: string;
+  answer: string;
+  answered_at: string;
+}
