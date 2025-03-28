@@ -120,7 +120,7 @@ func LoginUser (c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "Internal server error"})
 		return
 	}
-	c.SetCookie("token", token, 3600*6, "/", "", false, true)
+	c.SetCookie("token", token, 3600*6, "/", "localhost", false, false)
 	dbUser.Password = "" 
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": dbUser})
 

@@ -13,7 +13,9 @@ export const getAllQuestions = async () => {
 
 export const getQuestionsByUserId = async (user_id: string) => {
   try {
-    const response = await axiosInstance.get(`/questions/${user_id}`);
+    const response = await axiosInstance.get(`/questions/${user_id}`, {
+      withCredentials: true, // Ensures cookies are sent with the request
+    });
     return response.data;
   } catch (error) {
     console.error("Error while fetching questions by user id: ", error);

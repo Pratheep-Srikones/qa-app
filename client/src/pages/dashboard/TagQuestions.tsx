@@ -81,7 +81,6 @@ const TaggedQuestions = () => {
                     </h2>
                     <div className="text-sm text-gray-400 mt-1 flex justify-between">
                       <span>{formatDateTime(question.asked_at, 2)}</span>
-                      <span>{0} Answers</span>
                     </div>
                   </button>
                 </motion.div>
