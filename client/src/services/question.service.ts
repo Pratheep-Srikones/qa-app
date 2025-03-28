@@ -84,3 +84,13 @@ export const getTagsByQuestionId = async (question_id: string) => {
     throw error as AxiosError;
   }
 };
+
+export const getQuestionsBySearchTerm = async (searchTerm: string) => {
+  try {
+    const response = await axiosInstance.get(`/questions/search/${searchTerm}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error while searching questions: ", error);
+    throw error as AxiosError;
+  }
+};

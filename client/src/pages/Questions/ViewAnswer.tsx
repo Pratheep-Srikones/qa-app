@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { ArrowUp, ArrowDown } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import { useQuestionStore } from "../../store/useQuestionStore";
 import { formatDateTime } from "../../utils/format";
@@ -54,20 +53,6 @@ const SingleAnswerPage = () => {
 
           {/* Answer Text */}
           <p className="text-gray-300">{selectedAnswer?.answer}</p>
-
-          {/* Voting Section */}
-          <div className="flex justify-between mt-4">
-            <div className="flex items-center space-x-2">
-              <button className="flex items-center text-green-400 hover:text-green-300 transition-all">
-                <ArrowUp size={18} />
-                <span className="ml-1">{selectedAnswer?.upvotes}</span>
-              </button>
-              <button className="flex items-center text-red-400 hover:text-red-300 transition-all">
-                <ArrowDown size={18} />
-                <span className="ml-1">{selectedAnswer?.downvotes}</span>
-              </button>
-            </div>
-          </div>
         </motion.div>
       </div>
     </>

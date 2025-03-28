@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { useQuestionStore } from "../../store/useQuestionStore";
-import Loading from "../../components/Loading";
 import { useEffect, useState } from "react";
 import { Question, TopTags } from "../../types/types";
 import { toastError } from "../../utils/toast";
@@ -9,7 +8,8 @@ import { getTopTags } from "../../services/tag.services";
 import { formatTimeDifference } from "../../utils/format";
 
 const Home = () => {
-  const { setTag } = useQuestionStore();
+  const { setTag, fetchQuestionsBySearchTerm } = useQuestionStore();
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const {
     isFetchingQuestions,
@@ -39,6 +39,23 @@ const Home = () => {
 
     fetchData();
   }, [fetchLatestQuestions]);
+
+  useEffect(() => {
+    if (searchTerm && searchTerm !== "") {
+      const timer = setTimeout(() => {
+        fetchQuestionsBySearchTerm(searchTerm);
+      }, 1000);
+
+      return () => clearTimeout(timer); // Cleanup the timer on unmount or when searchTerm changes
+    }
+    if (searchTerm === "") {
+      const timer = setTimeout(() => {
+        fetchLatestQuestions();
+      }, 1000);
+
+      return () => clearTimeout(timer); // Fetch latest questions if search term is empty
+    }
+  }, [searchTerm, fetchQuestionsBySearchTerm, fetchLatestQuestions]);
 
   const handleNavigation = (question: Question) => {
     setSelectedQuestion(question);
@@ -70,6 +87,8 @@ const Home = () => {
         {/* Search Bar */}
         <div className="mt-10 max-w-2xl mx-auto w-full">
           <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             type="text"
             placeholder="Search for questions..."
             className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-purple-500"
@@ -79,10 +98,14 @@ const Home = () => {
         {/* Questions Feed */}
         <div className="mt-10">
           <h2 className="text-2xl font-bold text-center md:text-left">
-            Latest Questions
+            {searchTerm && searchTerm !== ""
+              ? `Search Results for "${searchTerm}"`
+              : "Latest Questions"}
           </h2>
           {isFetchingQuestions ? (
-            <Loading />
+            <div className="flex justify-center items-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-purple-500 border-solid"></div>
+            </div>
           ) : (
             <div className="mt-4 space-y-4">
               {fetchedQuestions &&

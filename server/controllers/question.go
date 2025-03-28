@@ -161,4 +161,30 @@ func AddQuestion(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Question added successfully", "question": newQuestion})
 }
 
+func GetQuestionsBySearchTerm (c *gin.Context) {
+	searchTerm := c.Param("searchTerm")
+	if searchTerm == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "searchTerm is required", "message": "Invalid input"})
+		return
+	}
 
+	rows, err := config.DB.Query(context.Background(), "SELECT * FROM questions WHERE title ILIKE $1 OR description ILIKE $1 OR question_id IN (SELECT question_id FROM question_tags WHERE tag ILIKE $1)", "%"+searchTerm+"%")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "Internal server error"})
+		return
+	}
+	defer rows.Close()
+
+	var questions []models.Question
+	for rows.Next() {
+		var question models.Question
+		err := rows.Scan(&question.Question_ID, &question.Asked_at, &question.User_ID, &question.Title, &question.Description, &question.Image_Urls, &question.AI_Answer)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		questions = append(questions, question)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"questions": questions, "message": "questions fetched successfully"})
+}

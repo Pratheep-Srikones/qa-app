@@ -6,6 +6,7 @@ import { toastError } from "../utils/toast";
 import {
   getLatestQuestions,
   getQuestionByTag,
+  getQuestionsBySearchTerm,
   getQuestionsByUserId,
 } from "../services/question.service";
 
@@ -21,6 +22,8 @@ interface QuestionState {
   tag: string | null;
   setTag: (tag: string) => void;
   fetchQuestionsByTag: (tag: string) => Promise<void>;
+
+  fetchQuestionsBySearchTerm: (searchTerm: string) => Promise<void>;
 
   selectedAnswer: Answer | null;
   setSelectedAnswer: (answer: Answer) => void;
@@ -83,6 +86,21 @@ export const useQuestionStore = create<QuestionState>()(
       selectedAnswer: null,
       setSelectedAnswer: (answer: Answer) => {
         set({ selectedAnswer: answer });
+      },
+      fetchQuestionsBySearchTerm: async (searchTerm: string) => {
+        if (searchTerm === "") {
+          toastError("Search term is required");
+          return;
+        }
+        set({ isFetchingQuestions: true });
+        try {
+          const data = await getQuestionsBySearchTerm(searchTerm);
+          set({ fetchedQuestions: data.questions });
+        } catch (error) {
+          toastError("Error while fetching questions by search term");
+        } finally {
+          set({ isFetchingQuestions: false });
+        }
       },
     }),
     {

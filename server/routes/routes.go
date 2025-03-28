@@ -34,6 +34,7 @@ func SetupRouter() *gin.Engine {
 	r.POST("/questions", middleware.AuthMiddleware(),controllers.AddQuestion)
 	r.POST("/questions/tags/:question_id", middleware.AuthMiddleware(),controllers.AddTagsToQuestions)
 	r.GET("/questions/tag/:tag", middleware.AuthMiddleware(),controllers.GetQuestionsByTag)
+	r.GET("/questions/search/:searchTerm", middleware.AuthMiddleware(),controllers.GetQuestionsBySearchTerm)
 
 	r.GET("/tags/:question_id", middleware.AuthMiddleware(),controllers.GetTagsByQuestionID)
 	r.GET("/tags/top", middleware.AuthMiddleware(),controllers.GetTopTags)
