@@ -130,3 +130,45 @@ func LogoutUser(c *gin.Context) {
 	c.SetCookie("token", "", -1, "/", "", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }
+
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+	UserID     string `json:"user_id" binding:"required"`
+}
+
+func ChangePassword (c *gin.Context) {
+	var request ChangePasswordRequest
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "Invalid request"})
+		return
+	}
+
+	
+	var dbUser models.User
+	err = config.DB.QueryRow(context.Background(), "SELECT password FROM users WHERE user_id = $1", request.UserID).Scan(&dbUser.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "Internal server error"})
+		return
+	}
+
+	if !utils.CheckPasswordHash(request.OldPassword, dbUser.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "", "message": "Invalid password"})
+		return
+	}
+
+	newPasswordHash, err := utils.HashPassword(request.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "Internal server error"})
+		return
+	}
+
+	_, err = config.DB.Exec(context.Background(), "UPDATE users SET password = $1 WHERE user_id = $2", newPasswordHash, request.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "message": "Internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
+}

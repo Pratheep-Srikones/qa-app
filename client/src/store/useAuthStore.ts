@@ -1,7 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { User } from "../types/types";
-import { login, logout, signup } from "../services/auth.services";
+import {
+  changePassword,
+  login,
+  logout,
+  signup,
+} from "../services/auth.services";
 import { toastError, toastSuccess } from "../utils/toast";
 
 interface AuthState {
@@ -27,6 +32,15 @@ interface AuthState {
   isLoggingOut: boolean;
 
   isauthLoading: boolean;
+
+  changePassword: (
+    oldPassword: string,
+    newPassword: string,
+    user_id: string,
+    navigate: (path: string) => void
+  ) => Promise<void>;
+
+  isChangingPassword: boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -91,6 +105,33 @@ export const useAuthStore = create<AuthState>()(
       },
       isLoggingOut: false,
       isauthLoading: false,
+
+      isChangingPassword: false,
+      changePassword: async (
+        oldPassword: string,
+        newPassword: string,
+        user_id: string,
+        navigate: (path: string) => void
+      ) => {
+        if (oldPassword === "" || newPassword === "") {
+          toastError("Please fill in all fields");
+          return;
+        }
+
+        set({ isChangingPassword: true });
+
+        try {
+          // Assuming there's a service function to handle password change
+          const data = await changePassword(oldPassword, newPassword, user_id);
+          toastSuccess(data.message);
+          navigate("/profile");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          toastError(error.response?.data?.message || "Password change failed");
+        } finally {
+          set({ isChangingPassword: false });
+        }
+      },
     }),
     {
       name: "auth-storage",

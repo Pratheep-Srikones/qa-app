@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const ChangePassword = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +22,8 @@ const ChangePassword = () => {
     newPassword: false,
     confirmNewPassword: false,
   });
-
+  const { changePassword, isChangingPassword } = useAuthStore();
+  const { currUser } = useAuthStore();
   const navigate = useNavigate();
 
   const toggleVisibility = (field: keyof typeof showPassword) => {
@@ -59,9 +61,19 @@ const ChangePassword = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!errors.newPassword && !errors.confirmNewPassword) {
-      console.log("Password changed successfully", formData);
-      navigate("/profile");
+    if (errors.newPassword || errors.confirmNewPassword) {
+      return;
+    }
+
+    if (currUser) {
+      changePassword(
+        formData.oldPassword,
+        formData.newPassword,
+        currUser.user_id,
+        navigate
+      );
+    } else {
+      console.error("User not found");
     }
   };
 
@@ -72,115 +84,124 @@ const ChangePassword = () => {
       animate={{ opacity: 1, y: 0, transition: { duration: 0.5 } }}
       exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
     >
-      <div className="w-full max-w-md p-8 space-y-6 bg-black/5 rounded-xl shadow-lg border border-gray-800 relative z-10">
-        <h1 className="text-2xl font-bold text-center text-white">
-          Change Password
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Old Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Old Password
-            </label>
-            <div className="relative mt-1">
-              <input
-                type={showPassword.oldPassword ? "text" : "password"}
-                name="oldPassword"
-                value={formData.oldPassword}
-                onChange={handleChange}
-                className="input input-neutral w-full pr-10"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => toggleVisibility("oldPassword")}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
-              >
-                {showPassword.oldPassword ? (
-                  <EyeOff size={18} />
-                ) : (
-                  <Eye size={18} />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* New Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              New Password
-            </label>
-            <div className="relative mt-1">
-              <input
-                type={showPassword.newPassword ? "text" : "password"}
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleChange}
-                className="input input-neutral w-full pr-10"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => toggleVisibility("newPassword")}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
-              >
-                {showPassword.newPassword ? (
-                  <EyeOff size={18} />
-                ) : (
-                  <Eye size={18} />
-                )}
-              </button>
-            </div>
-            {errors.newPassword && (
-              <p className="mt-1 text-xs text-yellow-500">
-                {errors.newPassword}
-              </p>
-            )}
-          </div>
-
-          {/* Confirm New Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Confirm New Password
-            </label>
-            <div className="relative mt-1">
-              <input
-                type={showPassword.confirmNewPassword ? "text" : "password"}
-                name="confirmNewPassword"
-                value={formData.confirmNewPassword}
-                onChange={handleChange}
-                className="input input-neutral w-full pr-10"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => toggleVisibility("confirmNewPassword")}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
-              >
-                {showPassword.confirmNewPassword ? (
-                  <EyeOff size={18} />
-                ) : (
-                  <Eye size={18} />
-                )}
-              </button>
-            </div>
-            {errors.confirmNewPassword && (
-              <p className="mt-1 text-xs text-yellow-500">
-                {errors.confirmNewPassword}
-              </p>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full py-3 text-lg font-semibold bg-purple-600 hover:bg-purple-700 rounded-lg transition-all duration-300 text-white flex items-center justify-center gap-2 shadow-md"
-            disabled={!!errors.newPassword || !!errors.confirmNewPassword}
-          >
+      {isChangingPassword ? (
+        <div className="flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="ml-4 text-white text-lg font-medium">
+            Changing Password...
+          </p>
+        </div>
+      ) : (
+        <div className="w-full max-w-md p-8 space-y-6 bg-black/5 rounded-xl shadow-lg border border-gray-800 relative z-10">
+          <h1 className="text-2xl font-bold text-center text-white">
             Change Password
-          </button>
-        </form>
-      </div>
+          </h1>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Old Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Old Password
+              </label>
+              <div className="relative mt-1">
+                <input
+                  type={showPassword.oldPassword ? "text" : "password"}
+                  name="oldPassword"
+                  value={formData.oldPassword}
+                  onChange={handleChange}
+                  className="input input-neutral w-full pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleVisibility("oldPassword")}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
+                >
+                  {showPassword.oldPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* New Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                New Password
+              </label>
+              <div className="relative mt-1">
+                <input
+                  type={showPassword.newPassword ? "text" : "password"}
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  className="input input-neutral w-full pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleVisibility("newPassword")}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
+                >
+                  {showPassword.newPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+              {errors.newPassword && (
+                <p className="mt-1 text-xs text-yellow-500">
+                  {errors.newPassword}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm New Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Confirm New Password
+              </label>
+              <div className="relative mt-1">
+                <input
+                  type={showPassword.confirmNewPassword ? "text" : "password"}
+                  name="confirmNewPassword"
+                  value={formData.confirmNewPassword}
+                  onChange={handleChange}
+                  className="input input-neutral w-full pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleVisibility("confirmNewPassword")}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
+                >
+                  {showPassword.confirmNewPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+              {errors.confirmNewPassword && (
+                <p className="mt-1 text-xs text-yellow-500">
+                  {errors.confirmNewPassword}
+                </p>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full py-3 text-lg font-semibold bg-purple-600 hover:bg-purple-700 rounded-lg transition-all duration-300 text-white flex items-center justify-center gap-2 shadow-md"
+              disabled={!!errors.newPassword || !!errors.confirmNewPassword}
+            >
+              Change Password
+            </button>
+          </form>
+        </div>
+      )}
       <div className="absolute inset-0 bg-gradient-to-br from-[#12012c] via-[#0a0a0a] to-[#25054d] opacity-80 blur-2xl"></div>
     </motion.div>
   );

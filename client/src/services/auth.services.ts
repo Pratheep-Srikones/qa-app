@@ -42,3 +42,21 @@ export const logout = async () => {
     throw error as AxiosError;
   }
 };
+
+export const changePassword = async (
+  old_password: string,
+  new_password: string,
+  user_id: string
+) => {
+  try {
+    const response = await axiosInstance.put("/auth/change-password", {
+      old_password,
+      new_password,
+      user_id,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error as AxiosError;
+  }
+};
